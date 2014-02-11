@@ -1,0 +1,56 @@
+apply plugin: 'maven'
+
+// Get versionCode from env variable BUILD_NUMBER (defined by the build server).
+def versionCode = isJenkinsBuild ? System.getenv('BUILD_NUMBER') : 0
+
+// Only the build server gets to do release biulds
+def repositoryUrl = isJenkinsBuild ? RELEASE_REPO : SNAPSHOT_REPO
+
+group = GROUP
+version = isJenkinsBuild ? VERSION + ".$versionCode" : VERSION + "-SNAPSHOT"
+
+configurations {
+    //Configuration to deploy on WebDav repository
+    deployerJars
+}
+
+dependencies {
+    deployerJars 'org.apache.maven.wagon:wagon-webdav:1.0-beta-2'
+}
+
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.allJava
+}
+
+task androidJavadocsJar(type: Jar) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.allSource
+}
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            configuration = configurations.deployerJars
+            pom.artifactId = POM_ARTIFACT_ID
+
+            repository(url: repositoryUrl) {
+                // Android Studio cannot handle properties not being defined even the tasks aren't
+                // invoked, so we make sure to not touch these unless they are defined.
+                def userName = project.hasProperty('CLOUDBEES_USERNAME') ? CLOUDBEES_USERNAME : null
+                def password = project.hasProperty('CLOUDBEES_PASSWORD') ? CLOUDBEES_PASSWORD : null
+
+                authentication(userName: userName, password: password)
+            }
+        }
+    }
+}

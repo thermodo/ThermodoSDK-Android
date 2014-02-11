@@ -16,3 +16,5 @@ android {
         versionCode isJenkinsBuild ? System.getenv('BUILD_NUMBER').toInteger() : 0
     }
 }
+
+apply from: '../maven_push.gradle'
