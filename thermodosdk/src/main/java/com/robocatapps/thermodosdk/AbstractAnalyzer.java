@@ -301,5 +301,10 @@ public abstract class AbstractAnalyzer {
         return Float.NaN;
     }
 
+	/**
+	 * Obtain an analysis result from the provided data.
+	 *
+	 * @return the analysis results
+	 */
     public abstract AnalyzerResult resultFromAnalyzingData(short[] data);
 }
