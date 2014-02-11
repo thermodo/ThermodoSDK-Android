@@ -12,7 +12,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 19
 
-        versionName VERSION
+        versionName "0.1"
         versionCode isJenkinsBuild ? System.getenv('BUILD_NUMBER').toInteger() : 0
     }
 }

@@ -11,8 +11,10 @@ public class ThermodoFactory {
 
 	/**
 	 * Returns an instance of the {@link Thermodo} object associated with the Application's context.
+	 * <p>The returned value is a singleton, so multiple calls to this method will return the same
+	 * Thermodo instance, no matter the context provided.</p>
 	 */
-	public static Thermodo getInstance(Context context) {
+	public static Thermodo getThermodoInstance(Context context) {
 		if (sInstance == null)
 			sInstance = new ThermodoImpl(context.getApplicationContext());
 		return sInstance;

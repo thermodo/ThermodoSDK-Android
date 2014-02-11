@@ -22,7 +22,7 @@ public class MainActivity extends Activity implements Thermodo.ThermodoListener 
 		setContentView(R.layout.activity_main);
 
 		mTemperatureTextView = (TextView) findViewById(R.id.temperatureTextView);
-		mThermodo = ThermodoFactory.getInstance(this);
+		mThermodo = ThermodoFactory.getThermodoInstance(this);
 		mThermodo.setThermodoListener(this);
 	}
 
