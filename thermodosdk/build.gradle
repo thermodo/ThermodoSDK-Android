@@ -1,0 +1,18 @@
+apply plugin: 'android-library'
+apply plugin: 'maven'
+
+dependencies {
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion "19.0.0"
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 19
+
+        versionName VERSION
+        versionCode isJenkinsBuild ? System.getenv('BUILD_NUMBER').toInteger() : 0
+    }
+}
