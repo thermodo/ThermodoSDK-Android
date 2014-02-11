@@ -6,6 +6,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.robocatapps.thermodosdk.Thermodo;
+import com.robocatapps.thermodosdk.ThermodoFactory;
 
 import java.util.logging.Logger;
 
@@ -21,7 +22,7 @@ public class MainActivity extends Activity implements Thermodo.ThermodoListener 
 		setContentView(R.layout.activity_main);
 
 		mTemperatureTextView = (TextView) findViewById(R.id.temperatureTextView);
-		mThermodo = Thermodo.getInstance(getBaseContext());
+		mThermodo = ThermodoFactory.getInstance(this);
 		mThermodo.setThermodoListener(this);
 	}
 
