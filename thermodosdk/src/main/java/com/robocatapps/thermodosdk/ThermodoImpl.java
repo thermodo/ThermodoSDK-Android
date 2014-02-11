@@ -50,6 +50,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 	private volatile boolean mIsMeasuring = false;
 	private volatile boolean mIsRunning = false;
 
+	private boolean mDeviceCheckEnabled;
 	private int mPreviousVolume = -1;
 
 	private boolean mThermodoIsPlugged;
@@ -105,6 +106,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		mDeviceDetector = new DeviceDetector(this);
 		mAnalyzer = new DefaultSignalAnalyzer();
+		mDeviceCheckEnabled = true; //enable device check by default
 	}
 
 	@Override
@@ -167,11 +169,12 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		if (pluggedIn)
 			setVolumeSettings();
 
-		//If plugged and is running check device
+		//If plugged and is running, check the device or directly start measuring
 		if (pluggedIn && mIsRunning && !mIsMeasuring)
-			// For now, disable detection.
-			// checkDevice();
-			onDetectionResult(true);
+			if(mDeviceCheckEnabled)
+				checkDevice();
+			else
+				onDetectionResult(true);
 		else if (mIsMeasuring)
 			stopMeasuring();
 
@@ -318,6 +321,16 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 	@Override
 	public ThermodoListener getThermodoListener() {
 		return mListener;
+	}
+
+	@Override
+	public void setEnabledDeviceCheck(boolean newValue) {
+		mDeviceCheckEnabled = newValue;
+	}
+
+	@Override
+	public boolean isEnabledDeviceCheck() {
+		return mDeviceCheckEnabled;
 	}
 
 	@Override

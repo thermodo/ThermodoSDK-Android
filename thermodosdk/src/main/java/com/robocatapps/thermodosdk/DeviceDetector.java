@@ -96,15 +96,21 @@ public class DeviceDetector implements AudioRecorder.OnBufferFilledListener {
 
         // Cutting samples from both ends of the sorted samples array to avoid the influence of
         // occasional amplitude jumps
-        short median = data[(data.length - CUT_SAMPLES_COUNT) / 2];
-        short max = data[data.length - CUT_SAMPLES_COUNT - 1];
-        Logger.log("Median: %d", median);
-        Logger.log("Min: %d\nMax: %d", data[CUT_SAMPLES_COUNT], max);
+//        short median = data[(data.length - CUT_SAMPLES_COUNT) / 2];
+//        short max = data[data.length - CUT_SAMPLES_COUNT - 1];
+//        Logger.log("Median: %d", median);
+//        Logger.log("Min: %d\nMax: %d", data[CUT_SAMPLES_COUNT], max);
+//
+//        boolean detected = max - median <= SILENCE_THRESHOLD;
+//        Logger.log("Thermodo detected by silence: " + detected);
+//
+//        return detected;
+	    short average=arrayAverageValue(data);
+	    boolean detected=average<SILENCE_THRESHOLD;
+	    Logger.log("Average: "+average);
+	    Logger.log("Thermodo detected by silence: "+detected);
 
-        boolean detected = max - median <= SILENCE_THRESHOLD;
-        Logger.log("Thermodo detected by silence: " + detected);
-
-        return detected;
+	    return detected;
     }
 
     /**
@@ -118,14 +124,27 @@ public class DeviceDetector implements AudioRecorder.OnBufferFilledListener {
     private boolean isDetectedByTone(short[] data) {
         Logger.log("Detecting by test tone");
 
-        Arrays.sort(data);
-        short median = data[data.length / 2];
-        short max = data[data.length - 1];
-        Logger.log("Median: %d", median);
-        Logger.log("Min: %d\nMax: %d", data[0], max);
+//        Arrays.sort(data);
+//        short median = data[data.length / 2];
+//        short max = data[data.length - 1];
+//        Logger.log("Median: %d", median);
+//        Logger.log("Min: %d\nMax: %d", data[0], max);
+//
+//        return max - median > TONE_THRESHOLD;
+		short average=arrayAverageValue(data);
+	    boolean detected=average>TONE_THRESHOLD;
+	    Logger.log("Average: "+average);
+	    Logger.log("Thermodo detected by tone: "+detected);
 
-        return max - median > TONE_THRESHOLD;
+	    return detected;
     }
+
+	private short arrayAverageValue(short[] data){
+		long sum=0;
+		for(short v:data)
+			sum+=Math.abs(v);
+		return (short) (sum/data.length);
+	}
 
     private void invokeListener(final boolean detected) {
         if (mListener != null)
