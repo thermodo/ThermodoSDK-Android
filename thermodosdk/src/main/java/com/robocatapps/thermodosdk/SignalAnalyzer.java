@@ -9,6 +9,7 @@ import com.robocatapps.thermodosdk.model.Trendline;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static com.robocatapps.thermodosdk.Constants.CLIPPING_THRESHOLD;
 import static com.robocatapps.thermodosdk.Constants.LOWER_AMPLITUDE;
@@ -193,6 +194,8 @@ public class SignalAnalyzer {
     private static final double MAX_TEMP = 125.0;
     private static final double REF_RESISTANCE = 100.0;
 
+	private static Logger sLog = Logger.getLogger(SignalAnalyzer.class.getName());
+
     public static void preformSimpleAnalysis(short[] samples) {
         int leftValue = 0;
         int rightValue = 0;
@@ -231,19 +234,19 @@ public class SignalAnalyzer {
         }
 
         if (leftSampleIndex < nSamples || rightSampleIndex < nSamples) {
-            Logger.log("Not enough samples detected");
+	        sLog.info("Not enough samples detected");
             return;
         }
 
         leftValue /= nSamples;
         rightValue /= nSamples;
 
-        Logger.log(String.format("Average values: %6d  |  %6d", leftValue, rightValue));
-        Logger.log(String.format("left/right: %f", (double) leftValue / rightValue));
-        Logger.log(String.format("right/left: %f", (double) rightValue / leftValue));
+        sLog.fine(String.format("Average values: %6d  |  %6d", leftValue, rightValue));
+	    sLog.fine(String.format("left/right: %f", (double) leftValue / rightValue));
+	    sLog.fine(String.format("right/left: %f", (double) rightValue / leftValue));
 
         double resistance = (rightValue * REF_RESISTANCE) / leftValue;
-        Logger.log("Left resistor: %f ohm", resistance);
+	    sLog.fine(String.format("Left resistor: %f ohm", resistance));
 
         for (int i = 0; i < NTC100K_VALUES.length - 1; i++) {
             if (resistance < NTC100K_VALUES[i] && resistance > NTC100K_VALUES[i + 1]) {
@@ -251,7 +254,7 @@ public class SignalAnalyzer {
                     NTC100K_VALUES[i])) *
                     (resistance -
                         NTC100K_VALUES[i]);
-                Logger.log("Temperature: %f ˚C", temperature);
+                sLog.finer(String.format("Temperature: %f ˚C", temperature));
                 break;
             }
         }

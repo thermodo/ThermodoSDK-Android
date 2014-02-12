@@ -12,6 +12,8 @@ import android.os.Message;
 
 import com.robocatapps.thermodosdk.model.AnalyzerResult;
 
+import java.util.logging.Logger;
+
 import static com.robocatapps.thermodosdk.Constants.FREQUENCY;
 import static com.robocatapps.thermodosdk.Constants.LOWER_AMPLITUDE;
 import static com.robocatapps.thermodosdk.Constants.NUMBER_OF_CELLS;
@@ -26,6 +28,8 @@ import static com.robocatapps.thermodosdk.Constants.UPPER_AMPLITUDE;
  */
 public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		AudioManager.OnAudioFocusChangeListener, DeviceDetector.OnDetectionResultListener, Thermodo {
+
+	private static Logger sLog = Logger.getLogger(Thermodo.class.getName());
 
 	private static final IntentFilter HEADSET_PLUG_INTENT_FILTER = new IntentFilter(Intent
 			.ACTION_HEADSET_PLUG);
@@ -73,7 +77,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 					break;
 				case MSG_GOT_TEMPERATURE:
 					float temperature = msg.getData().getFloat(MSG_TEMPERATURE);
-					mListener.onGotTemperature(temperature);
+					mListener.onTemperatureMeasured(temperature);
 					break;
 				case MSG_THERMODO_PLUGGED_IN:
 					mListener.onThermodoPluggedIn();
@@ -106,7 +110,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		mDeviceDetector = new DeviceDetector(this);
 		mAnalyzer = new DefaultSignalAnalyzer();
-		mDeviceCheckEnabled = true; //enable device check by default
+		mDeviceCheckEnabled = false; //disable device check by default
 	}
 
 	@Override
@@ -171,7 +175,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 
 		//If plugged and is running, check the device or directly start measuring
 		if (pluggedIn && mIsRunning && !mIsMeasuring)
-			if(mDeviceCheckEnabled)
+			if (mDeviceCheckEnabled)
 				checkDevice();
 			else
 				onDetectionResult(true);
@@ -254,7 +258,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 	}
 
 	/**
-	 * Sets volume settings which improve overall measurements.
+	 * Sets volume settings in order to improve overall measurements.
 	 */
 	private void setVolumeSettings() {
 		//Unmute mic
@@ -264,10 +268,26 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
 		mAudioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
 
-		//Set volume, save previous value
+		//Set volume to maximum, saving previous value
+		int maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 		mPreviousVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-		mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mAudioManager.getStreamMaxVolume
-				(AudioManager.STREAM_MUSIC), 0);
+
+		// At first, check if it's really needed to change the volume
+		if (mPreviousVolume >= maxVolume)
+			return;
+
+		//Then try to change the volume without notifying the user
+		mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0);
+		if (mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC) >= maxVolume)
+			return;
+
+		// Finally try to change the volume notifying the user, so, if needed, permissions are
+		// given to raise the volume above a certain level (helpful on some devices)
+		mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, AudioManager.FLAG_SHOW_UI);
+		if (mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC) < maxVolume) {
+			sLog.warning("Volume could not be set to the maximum value.");
+			mListener.onErrorOccurred(Thermodo.ERROR_SET_MAX_VOLUME_FAILED);
+		}
 	}
 
 	/**
@@ -309,8 +329,19 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 	}
 
 	@Override
-	public void onError(int what) {
-		// TODO: Somehow handle recording errors
+	public void onRecorderError(int what) {
+		// If we get a recording error, the Audio Recorder should be stopped and we need to make
+		// sure that we stop the measurement to keep the state consistent and notify the listener
+		// NOTE: This method is called from a background thread so we need to make sure we run in
+		// on the main thread
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				// NOTE: Calling stopMeasuring will stop the AudioRecorder and will do the cleanup
+				stopMeasuring();
+				mListener.onErrorOccurred(ERROR_AUDIO_RECORD_FAILURE);
+			}
+		});
 	}
 
 	@Override
@@ -323,12 +354,22 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		return mListener;
 	}
 
-	@Override
+	/**
+	 * Sets whether a check is made to make sure the device connected to the audio jack is a
+	 * Thermodo or something else (e.g. headphones, microphone). By default, a check is done.
+	 * <p/>
+	 * NOTE: Keep this out of the main Thermodo interface until further testing
+	 */
 	public void setEnabledDeviceCheck(boolean newValue) {
 		mDeviceCheckEnabled = newValue;
 	}
 
-	@Override
+	/**
+	 * Checks whether a verification is made to make sure the device connected to the audio jack is
+	 * a Thermodo or something else (e.g. headphones, microphone).
+	 * <p/>
+	 * NOTE: Keep this out of the main Thermodo interface until further testing
+	 */
 	public boolean isEnabledDeviceCheck() {
 		return mDeviceCheckEnabled;
 	}
