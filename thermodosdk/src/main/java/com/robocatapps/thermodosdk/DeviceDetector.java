@@ -3,13 +3,15 @@ package com.robocatapps.thermodosdk;
 import android.os.Handler;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 /**
  * Manages Thermodo detection process.
  */
 public class DeviceDetector implements AudioRecorder.OnBufferFilledListener {
 
-    private static final int TEST_TONE_DURATION = 700;
+	private static Logger sLog = Logger.getLogger(DeviceDetector.class.getName());
+	private static final int TEST_TONE_DURATION = 700;
     private static final int TEST_TONE_FREQUENCY = 200;
     private static final short SILENCE_THRESHOLD = 100;
     private static final short TONE_THRESHOLD = 1000;
@@ -77,7 +79,7 @@ public class DeviceDetector implements AudioRecorder.OnBufferFilledListener {
 
     @Override
     public void onError(int what) {
-        Logger.log("Recording error: " + what);
+	    sLog.warning("Recording error: " + what);
         invokeListener(false);
     }
 
@@ -90,7 +92,7 @@ public class DeviceDetector implements AudioRecorder.OnBufferFilledListener {
      * @return true if Thermodo was detected, false otherwise.
      */
     private boolean isDetectedBySilence(short[] data) {
-        Logger.log("Detecting by silence...");
+	    sLog.fine("Detecting by silence...");
 
         Arrays.sort(data);
 
@@ -107,8 +109,8 @@ public class DeviceDetector implements AudioRecorder.OnBufferFilledListener {
 //        return detected;
 	    short average=arrayAverageValue(data);
 	    boolean detected=average<SILENCE_THRESHOLD;
-	    Logger.log("Average: "+average);
-	    Logger.log("Thermodo detected by silence: "+detected);
+	    sLog.finer("Average: " + average);
+	    sLog.finer("Thermodo detected by silence: " + detected);
 
 	    return detected;
     }
@@ -122,7 +124,7 @@ public class DeviceDetector implements AudioRecorder.OnBufferFilledListener {
      * @return true if Thermodo was detected, false otherwise.
      */
     private boolean isDetectedByTone(short[] data) {
-        Logger.log("Detecting by test tone");
+	    sLog.fine("Detecting by test tone");
 
 //        Arrays.sort(data);
 //        short median = data[data.length / 2];
@@ -133,8 +135,8 @@ public class DeviceDetector implements AudioRecorder.OnBufferFilledListener {
 //        return max - median > TONE_THRESHOLD;
 		short average=arrayAverageValue(data);
 	    boolean detected=average>TONE_THRESHOLD;
-	    Logger.log("Average: "+average);
-	    Logger.log("Thermodo detected by tone: "+detected);
+	    sLog.finer("Average: " + average);
+	    sLog.finer("Thermodo detected by tone: " + detected);
 
 	    return detected;
     }

@@ -6,8 +6,12 @@ import com.robocatapps.thermodosdk.model.Sample;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class SimplifiedSignalAnalyzer extends AbstractAnalyzer {
+
+	private static Logger sLog = Logger.getLogger(SimplifiedSignalAnalyzer.class.getName());
+
     @Override
     public AnalyzerResult resultFromAnalyzingData(short[] data) {
 
@@ -67,10 +71,10 @@ public class SimplifiedSignalAnalyzer extends AbstractAnalyzer {
 
         short rightAmplitude = medianValueOfShortList(xValues);
 
-        Logger.log("Left ampl: %d , Right ampl: %d", leftAmplitude, rightAmplitude);
+	    sLog.fine(String.format("Left ampl: %d , Right ampl: %d", leftAmplitude, rightAmplitude));
         float resistance = ((float) rightAmplitude) / leftAmplitude * 100.0f;
         float temperature = temperatureFromResistance(resistance);
-        Logger.log("Temperature: " + temperature);
+	    sLog.fine("Temperature: " + temperature);
 
         result.temperature = temperature;
         result.numberOfFrames = 4;
