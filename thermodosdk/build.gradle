@@ -1,7 +1,17 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.8.+'
+    }
+}
+
 apply plugin: 'android-library'
-apply plugin: 'maven'
 
 dependencies {
+
 }
 
 android {
@@ -13,7 +23,7 @@ android {
         targetSdkVersion 19
 
         versionName "0.1"
-        versionCode isJenkinsBuild ? System.getenv('BUILD_NUMBER').toInteger() : 0
+        versionCode System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER').toInteger() : 0
     }
 }
 
