@@ -27,14 +27,16 @@ public class AudioRecorder {
          */
         public void onBufferFilled(short[] data);
 
-        /**
-         * Called if an error occurs while recording. Recording will stop at this point and you
-         * should not rely on being able to re-use the AudioRecorder after that point.
-         *
-         * @param what The value returned from
-         *             {@link android.media.AudioRecord#read(short[], int, int)}
-         */
-        public void onError(int what);
+	    /**
+	     * Called if an error occurs while recording. Recording thread will reach an unstable state,
+	     * so the recording should be stopped.
+	     * <p/>
+	     * This method will be called from a background thread.
+	     *
+	     * @param what The value returned from {@link android.media.AudioRecord#read(short[], int,
+	     * int)}
+	     */
+	    public void onRecorderError(int what);
     }
 
     private final OnBufferFilledListener mBufferListener;
@@ -101,11 +103,10 @@ public class AudioRecorder {
                     break;
 
                 // Check for error
-                if (read == AudioRecord.ERROR_BAD_VALUE ||
-                        read == AudioRecord.ERROR_INVALID_OPERATION) {
+                if (read < 0 ) {
                     //Fire error to the listener
                     if (mListener != null)
-                        mListener.onError(read);
+                        mListener.onRecorderError(read);
                     break;
                 }
 

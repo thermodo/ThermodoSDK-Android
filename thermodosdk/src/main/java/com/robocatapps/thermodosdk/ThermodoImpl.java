@@ -329,8 +329,19 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 	}
 
 	@Override
-	public void onError(int what) {
-		// TODO: Somehow handle recording errors
+	public void onRecorderError(int what) {
+		// If we get a recording error, the Audio Recorder should be stopped and we need to make
+		// sure that we stop the measurement to keep the state consistent and notify the listener
+		// NOTE: This method is called from a background thread so we need to make sure we run in
+		// on the main thread
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				// NOTE: Calling stopMeasuring will stop the AudioRecorder and will do the cleanup
+				stopMeasuring();
+				mListener.onErrorOccurred(ERROR_AUDIO_RECORD_FAILURE);
+			}
+		});
 	}
 
 	@Override

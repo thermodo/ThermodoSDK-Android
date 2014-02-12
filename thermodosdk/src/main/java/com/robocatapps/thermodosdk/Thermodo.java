@@ -17,6 +17,13 @@ public interface Thermodo {
 	public static final int ERROR_SET_MAX_VOLUME_FAILED = 101;
 
 	/**
+	 * The error returned when a critical failure has been detected during Thermodo SDK's recording.
+	 * Before sending this error, the measurement is stopped, so this error is preceded by a call to
+	 * {@link com.robocatapps.thermodosdk.Thermodo.ThermodoListener#onStoppedMeasuring()}.
+	 */
+	public static final int ERROR_AUDIO_RECORD_FAILURE = 102;
+
+	/**
 	 * This method notifies the instance of this object to start detection of the temperature. Must be called on the main thread.
 	 * <p>First of all it will setup additional settings to make measurements precise as possible.
 	 * After that, if Thermodo device (or any headset) is inserted, it will start device detection algorithm,
