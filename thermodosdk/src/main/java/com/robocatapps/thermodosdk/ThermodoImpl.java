@@ -12,6 +12,8 @@ import android.os.Message;
 
 import com.robocatapps.thermodosdk.model.AnalyzerResult;
 
+import java.util.logging.Logger;
+
 import static com.robocatapps.thermodosdk.Constants.FREQUENCY;
 import static com.robocatapps.thermodosdk.Constants.LOWER_AMPLITUDE;
 import static com.robocatapps.thermodosdk.Constants.NUMBER_OF_CELLS;
@@ -26,6 +28,8 @@ import static com.robocatapps.thermodosdk.Constants.UPPER_AMPLITUDE;
  */
 public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		AudioManager.OnAudioFocusChangeListener, DeviceDetector.OnDetectionResultListener, Thermodo {
+
+	private static Logger sLog = Logger.getLogger(Thermodo.class.getName());
 
 	private static final IntentFilter HEADSET_PLUG_INTENT_FILTER = new IntentFilter(Intent
 			.ACTION_HEADSET_PLUG);
@@ -171,7 +175,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 
 		//If plugged and is running, check the device or directly start measuring
 		if (pluggedIn && mIsRunning && !mIsMeasuring)
-			if(mDeviceCheckEnabled)
+			if (mDeviceCheckEnabled)
 				checkDevice();
 			else
 				onDetectionResult(true);
@@ -254,7 +258,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 	}
 
 	/**
-	 * Sets volume settings which improve overall measurements.
+	 * Sets volume settings in order to improve overall measurements.
 	 */
 	private void setVolumeSettings() {
 		//Unmute mic
@@ -264,10 +268,26 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
 		mAudioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
 
-		//Set volume, save previous value
+		//Set volume to maximum, saving previous value
+		int maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 		mPreviousVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-		mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mAudioManager.getStreamMaxVolume
-				(AudioManager.STREAM_MUSIC), 0);
+
+		// At first, check if it's really needed to change the volume
+		if (mPreviousVolume >= maxVolume)
+			return;
+
+		//Then try to change the volume without notifying the user
+		mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0);
+		if (mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC) >= maxVolume)
+			return;
+
+		// Finally try to change the volume notifying the user, so, if needed, permissions are
+		// given to raise the volume above a certain level (helpful on some devices)
+		mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, AudioManager.FLAG_SHOW_UI);
+		if (mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC) < maxVolume) {
+			sLog.warning("Volume could not be set to the maximum value.");
+			mListener.onErrorOccurred(Thermodo.ERROR_SET_MAX_VOLUME_FAILED);
+		}
 	}
 
 	/**

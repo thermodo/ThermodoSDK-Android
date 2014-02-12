@@ -11,6 +11,12 @@ public interface Thermodo {
 	public static final int ERROR_AUDIO_FOCUS_GAIN_FAILED = 100;
 
 	/**
+	 * The error returned when Thermodo has tried to set the volume to the maximum volume, but has
+	 * failed.
+	 */
+	public static final int ERROR_SET_MAX_VOLUME_FAILED = 101;
+
+	/**
 	 * This method notifies the instance of this object to start detection of the temperature. Must be called on the main thread.
 	 * <p>First of all it will setup additional settings to make measurements precise as possible.
 	 * After that, if Thermodo device (or any headset) is inserted, it will start device detection algorithm,
