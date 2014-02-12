@@ -110,7 +110,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 		mDeviceDetector = new DeviceDetector(this);
 		mAnalyzer = new DefaultSignalAnalyzer();
-		mDeviceCheckEnabled = true; //enable device check by default
+		mDeviceCheckEnabled = false; //disable device check by default
 	}
 
 	@Override
@@ -354,12 +354,22 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		return mListener;
 	}
 
-	@Override
+	/**
+	 * Sets whether a check is made to make sure the device connected to the audio jack is a
+	 * Thermodo or something else (e.g. headphones, microphone). By default, a check is done.
+	 * <p/>
+	 * NOTE: Keep this out of the main Thermodo interface until further testing
+	 */
 	public void setEnabledDeviceCheck(boolean newValue) {
 		mDeviceCheckEnabled = newValue;
 	}
 
-	@Override
+	/**
+	 * Checks whether a verification is made to make sure the device connected to the audio jack is
+	 * a Thermodo or something else (e.g. headphones, microphone).
+	 * <p/>
+	 * NOTE: Keep this out of the main Thermodo interface until further testing
+	 */
 	public boolean isEnabledDeviceCheck() {
 		return mDeviceCheckEnabled;
 	}

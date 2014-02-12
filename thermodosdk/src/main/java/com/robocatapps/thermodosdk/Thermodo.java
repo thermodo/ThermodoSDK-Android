@@ -53,18 +53,6 @@ public interface Thermodo {
 	public ThermodoListener getThermodoListener();
 
 	/**
-	 * Sets whether a check is made to make sure the device connected to the audio jack is a Thermodo
-	 * or something else (e.g. headphones, microphone). By default, a check is done.
-	 */
-	public void setEnabledDeviceCheck(boolean newValue);
-
-	/**
-	 * Checks whether a verification is made to make sure the device connected to the audio jack is a Thermodo
-	 * or something else (e.g. headphones, microphone).
-	 */
-	public boolean isEnabledDeviceCheck();
-
-	/**
 	 * Interface for receiving notifications for events related to the Thermodo Sensor. Methods will be called on
 	 * the main thread.
 	 */
