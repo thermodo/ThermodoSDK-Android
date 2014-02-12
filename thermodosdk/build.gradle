@@ -9,6 +9,7 @@ buildscript {
 }
 
 apply plugin: 'android-library'
+apply plugin: 'maven'
 
 dependencies {
 
@@ -22,8 +23,8 @@ android {
         minSdkVersion 15
         targetSdkVersion 19
 
-        versionName "0.1"
-        versionCode System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER').toInteger() : 0
+        versionName VERSION
+        versionCode isJenkinsBuild ? System.getenv('BUILD_NUMBER').toInteger() : 0
     }
 }
 
