@@ -40,7 +40,7 @@ public class MainActivity extends Activity implements Thermodo.ThermodoListener 
 	}
 
 	@Override
-	public void onGotTemperature(float temperature) {
+	public void onTemperatureMeasured(float temperature) {
 		mTemperatureTextView.setText(Float.toString(temperature));
 		sLog.fine("Got temparature: " + temperature);
 	}
@@ -64,6 +64,13 @@ public class MainActivity extends Activity implements Thermodo.ThermodoListener 
 		switch (what) {
 			case Thermodo.ERROR_AUDIO_FOCUS_GAIN_FAILED:
 				sLog.severe("An error has occurred: Audio Focus Gain Failed");
+				mTemperatureTextView.setText(getString(R.string.thermodo_unplugged));
+				break;
+			case Thermodo.ERROR_AUDIO_RECORD_FAILURE:
+				sLog.severe("An error has occurred: Audio Record Failure");
+				break;
+			case Thermodo.ERROR_SET_MAX_VOLUME_FAILED:
+				sLog.warning("An error has occurred: The volume could not be set to maximum");
 				break;
 			default:
 				sLog.severe("An unidentified error has occurred: " + what);

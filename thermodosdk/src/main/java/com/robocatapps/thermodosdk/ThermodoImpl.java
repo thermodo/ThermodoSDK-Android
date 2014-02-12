@@ -77,7 +77,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 					break;
 				case MSG_GOT_TEMPERATURE:
 					float temperature = msg.getData().getFloat(MSG_TEMPERATURE);
-					mListener.onGotTemperature(temperature);
+					mListener.onTemperatureMeasured(temperature);
 					break;
 				case MSG_THERMODO_PLUGGED_IN:
 					mListener.onThermodoPluggedIn();
