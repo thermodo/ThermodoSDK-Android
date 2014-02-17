@@ -46,19 +46,6 @@ public class MainActivity extends Activity implements Thermodo.ThermodoListener 
 	}
 
 	@Override
-	public void onThermodoPluggedIn() {
-		Toast.makeText(this, "Thermodo plugged in", Toast.LENGTH_SHORT).show();
-		sLog.info("Thermodo plugged in");
-	}
-
-	@Override
-	public void onThermodoUnplugged() {
-		Toast.makeText(this, "Thermodo plugged out", Toast.LENGTH_SHORT).show();
-		mTemperatureTextView.setText(getString(R.string.thermodo_unplugged));
-		sLog.info("Thermodo plugged out");
-	}
-
-	@Override
 	public void onErrorOccurred(int what) {
 		Toast.makeText(this, "An error has occurred: " + what, Toast.LENGTH_SHORT).show();
 		switch (what) {

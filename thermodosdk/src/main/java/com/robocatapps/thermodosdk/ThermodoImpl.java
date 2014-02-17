@@ -24,7 +24,7 @@ import static com.robocatapps.thermodosdk.Constants.SYNC_CELL_INDEX;
 import static com.robocatapps.thermodosdk.Constants.UPPER_AMPLITUDE;
 
 /**
- * A main class that utilizes all measurments and states.
+ * Main implementation of the {@link Thermodo} interface.
  */
 public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		AudioManager.OnAudioFocusChangeListener, DeviceDetector.OnDetectionResultListener, Thermodo {
@@ -37,8 +37,6 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 	private static final int MSG_STARTED_MEASURING = 0;
 	private static final int MSG_STOPPED_MEASURING = 1;
 	private static final int MSG_GOT_TEMPERATURE = 2;
-	private static final int MSG_THERMODO_PLUGGED_IN = 3;
-	private static final int MSG_THERMODO_UNPLUGGED = 4;
 
 	private static final String MSG_TEMPERATURE = "_temperature";
 
@@ -78,12 +76,6 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 				case MSG_GOT_TEMPERATURE:
 					float temperature = msg.getData().getFloat(MSG_TEMPERATURE);
 					mListener.onTemperatureMeasured(temperature);
-					break;
-				case MSG_THERMODO_PLUGGED_IN:
-					mListener.onThermodoPluggedIn();
-					break;
-				case MSG_THERMODO_UNPLUGGED:
-					mListener.onThermodoUnplugged();
 					break;
 			}
 		}
@@ -184,8 +176,6 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 
 		if (mThermodoIsPlugged && !pluggedIn) {
 			mThermodoIsPlugged = false;
-
-			mHandler.sendEmptyMessage(MSG_THERMODO_UNPLUGGED);
 		}
 	}
 
@@ -207,11 +197,9 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		mAudioTrack.play(-1);
 		mRecorder.startRecording();
 
-		if (!mIsMeasuring) {
-			mIsMeasuring = true;
-			//Notify that measurement started
-			mHandler.sendEmptyMessage(MSG_STARTED_MEASURING);
-		}
+    	mIsMeasuring = true;
+        //Notify that measurement started
+        mHandler.sendEmptyMessage(MSG_STARTED_MEASURING);
 	}
 
 	/**
@@ -228,11 +216,8 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 		mRecorder.stopRecording();
 
 		//Notify listener that we stop measuring temperature
-		if (mIsMeasuring) {
-			mIsMeasuring = false;
-
-			mHandler.sendEmptyMessage(MSG_STOPPED_MEASURING);
-		}
+        mIsMeasuring = false;
+        mHandler.sendEmptyMessage(MSG_STOPPED_MEASURING);
 	}
 
 	/**
@@ -360,7 +345,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 	 * <p/>
 	 * NOTE: Keep this out of the main Thermodo interface until further testing
 	 */
-	public void setEnabledDeviceCheck(boolean newValue) {
+	public void setDeviceCheckEnabled(boolean newValue) {
 		mDeviceCheckEnabled = newValue;
 	}
 
@@ -370,7 +355,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 	 * <p/>
 	 * NOTE: Keep this out of the main Thermodo interface until further testing
 	 */
-	public boolean isEnabledDeviceCheck() {
+	public boolean isDeviceCheckEnabled() {
 		return mDeviceCheckEnabled;
 	}
 
@@ -389,11 +374,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 
 		mThermodoIsPlugged = thermodoDetected;
 
-		//Notify listener if needed
-		if (mThermodoIsPlugged)
-			mHandler.sendEmptyMessage(MSG_THERMODO_PLUGGED_IN);
-		else
+		if (!mThermodoIsPlugged)
 			restoreVolumeSettings();
 	}
-
 }

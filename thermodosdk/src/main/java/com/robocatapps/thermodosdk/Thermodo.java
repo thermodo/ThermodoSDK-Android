@@ -1,8 +1,9 @@
 package com.robocatapps.thermodosdk;
 
 /**
- * The main interface that is used for interaction with the Thermodo Sensor's measurements and
- * states.
+ * The main interface that is used for interaction with the Thermodo sensor's measurements and
+ * states. An instance is retrieved through
+ * {@link ThermodoFactory#getThermodoInstance(android.content.Context)}.
  */
 public interface Thermodo {
 
@@ -22,7 +23,7 @@ public interface Thermodo {
 	/**
 	 * The error returned when a critical recorder failure has been detected while measuring. Before
 	 * sending this error, the measurement is stopped, so this error is preceded by a call to {@link
-	 * com.robocatapps.thermodosdk.Thermodo.ThermodoListener#onStoppedMeasuring()}.
+	 * ThermodoListener#onStoppedMeasuring()}.
 	 */
 	public static final int ERROR_AUDIO_RECORD_FAILURE = 102;
 
@@ -42,7 +43,7 @@ public interface Thermodo {
 	public void start();
 
 	/**
-	 * Checks whether the Thermodo measurements algorithm is currently running.
+	 * Checks whether this Thermodo instance has been started and is prepared to measure.
 	 */
 	public boolean isRunning();
 
@@ -57,7 +58,7 @@ public interface Thermodo {
 	 * Sets the ThermodoListener whose methods are called whenever some Thermodo related events
 	 * occur.
 	 *
-	 * @see {@link com.robocatapps.thermodosdk.Thermodo.ThermodoListener}
+	 * @see {@link Thermodo.ThermodoListener}
 	 */
 	public void setThermodoListener(ThermodoListener listener);
 
@@ -77,12 +78,12 @@ public interface Thermodo {
 	public interface ThermodoListener {
 
 		/**
-		 * Called when the Thermodo SDK starts the measuring.
+		 * Called when the Thermodo SDK starts measuring.
 		 */
 		public void onStartedMeasuring();
 
 		/**
-		 * Called when the Thermodo SDK stops the measuring.
+		 * Called when the Thermodo SDK stops measuring.
 		 */
 		public void onStoppedMeasuring();
 
@@ -93,16 +94,6 @@ public interface Thermodo {
 		 * @param temperature the measured temperature value, in degrees Celsius
 		 */
 		public void onTemperatureMeasured(float temperature);
-
-		/**
-		 * Called when the Thermodo SDK detects that the sensor has been plugged in.
-		 */
-		public void onThermodoPluggedIn();
-
-		/**
-		 * Called when the Thermodo SDK detects that the sensor has been unplugged.
-		 */
-		public void onThermodoUnplugged();
 
 		/**
 		 * Called when an error has occurred during the initialization or the measurements done by
