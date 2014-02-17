@@ -22,7 +22,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 19
 
-        versionName "0.1"
+        versionName "1.0"
         versionCode System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER').toInteger() : 0
     }
 }
