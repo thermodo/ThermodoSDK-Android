@@ -17,16 +17,11 @@ buildscript {
 allprojects {
     repositories {
         mavenCentral()
-
-        // Pick up libraries released on Greener Pastures' CloudBees repository
-        maven {
-            url 'https://repository-greenerpastures.forge.cloudbees.com/release/'
-        }
     }
 
     ext {
         // Flag signifying whether build is running on Jenkins
-        isJenkinsBuild  = System.getenv('BUILD_NUMBER') != null
+        isJenkinsBuild = System.getenv('BUILD_NUMBER') != null
     }
 }
 
