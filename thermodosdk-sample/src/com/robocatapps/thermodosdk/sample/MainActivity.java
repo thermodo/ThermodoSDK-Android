@@ -74,7 +74,6 @@ public class MainActivity extends Activity implements Thermodo.ThermodoListener 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		sLog.info("Stopping...");
 		mThermodo.stop();
 	}
 }
