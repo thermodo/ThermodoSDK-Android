@@ -36,6 +36,7 @@ public class MainActivity extends Activity implements Thermodo.ThermodoListener 
 	@Override
 	public void onStoppedMeasuring() {
 		Toast.makeText(this, "Stopped measuring", Toast.LENGTH_SHORT).show();
+		mTemperatureTextView.setText(getString(R.string.thermodo_unplugged));
 		sLog.info("Stopped measuring");
 	}
 
@@ -73,6 +74,7 @@ public class MainActivity extends Activity implements Thermodo.ThermodoListener 
 	@Override
 	protected void onStop() {
 		super.onStop();
+		sLog.info("Stopping...");
 		mThermodo.stop();
 	}
 }
