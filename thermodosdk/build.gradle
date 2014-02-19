@@ -33,3 +33,17 @@ android {
         }
     }
 }
+
+// Task for creating a JAR file for the ThermodoSDK
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    if (name.equals(com.android.builder.BuilderConstants.DEBUG)) {
+        return; // Skip debug builds.
+    }
+    def task = project.tasks.create "jar${name.capitalize()}", Jar
+    task.dependsOn variant.javaCompile
+    task.from variant.javaCompile.destinationDir
+    task.destinationDir file('dist')
+    task.archiveName = LIBRARY_NAME + "-" + VERSION + ".jar"
+    artifacts.add('archives', task);
+}
