@@ -26,6 +26,12 @@ android {
         versionCode System.getenv('BUILD_NUMBER') != null ? System.getenv('BUILD_NUMBER').toInteger() : 0
     }
 
+    release {
+        runProguard true
+        proguardFile getDefaultProguardFile('proguard-android.txt')
+        proguardFile file('proguard-rules.txt')
+    }    
+
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'

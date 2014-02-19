@@ -7,10 +7,11 @@ import android.widget.Toast;
 
 import com.robocatapps.thermodosdk.Thermodo;
 import com.robocatapps.thermodosdk.ThermodoFactory;
+import com.robocatapps.thermodosdk.ThermodoListener;
 
 import java.util.logging.Logger;
 
-public class MainActivity extends Activity implements Thermodo.ThermodoListener {
+public class MainActivity extends Activity implements ThermodoListener {
 
 	private static Logger sLog = Logger.getLogger(MainActivity.class.getName());
 	private Thermodo mThermodo;
