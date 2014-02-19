@@ -2,8 +2,8 @@ package com.robocatapps.thermodosdk;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.MediaRecorder;
 
+import static com.robocatapps.thermodosdk.Constants.DEFAULT_AUDIO_RECORD_SOURCE;
 import static com.robocatapps.thermodosdk.Constants.SAMPLE_RATE;
 import static com.robocatapps.thermodosdk.Constants.SECONDS;
 
@@ -85,10 +85,11 @@ public class AudioRecorder {
         private final AudioRecord mAudioRecord;
 
         public RecorderThread(OnBufferFilledListener listener) {
+
             int bufferSize = getBufferSize();
             mBuffer = new short[bufferSize / 2];
             mListener = listener;
-            mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
+            mAudioRecord = new AudioRecord(DEFAULT_AUDIO_RECORD_SOURCE, SAMPLE_RATE,
                     AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
                     bufferSize);
         }
@@ -103,7 +104,7 @@ public class AudioRecorder {
                     break;
 
                 // Check for error
-                if (read < 0 ) {
+                if (read < 0) {
                     //Fire error to the listener
                     if (mListener != null)
                         mListener.onRecorderError(read);
