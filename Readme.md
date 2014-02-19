@@ -19,6 +19,7 @@ dependencies {
 --->
 
 If you are using Gradle for building your Android project, you must follow the these steps:
+
 1. Download the latest [version](https://github.com/thermodo/ThermodoSDK-Android) of the SDK
 2. Add the `thermodosdk` folder as a module in your Gradle project
 3. Add the following dependency in your gradle build file:
@@ -31,6 +32,7 @@ dependencies {
 
 ### Using Eclipse Development Environment
 If you are using the Eclipse Development Environment with the ADT plugin version 0.9.7 or greater you can include the ThermodoSdk project as a library project, following these steps:
+
 1. Download the latest [version](https://github.com/thermodo/ThermodoSDK-Android) of the SDK
 2. Create a new Android project in Eclipse using the `thermodosdk` folder as the existing source
 3. In the project properties, add the created project under the ‘Libraries’ section of the ‘Android’ category.
@@ -48,6 +50,7 @@ If you are using Maven for building your Android project, you can simply add a d
 --->
 
 ##Usage
+
 To use the ThermodoSDK in your Android project, 3 separate steps need to be followed:
 1. Declare the proper permissions required by the SDK
 2. Implement a `ThermodoListener` that will be notified of Thermodo related events
@@ -59,7 +62,7 @@ A full sample application that uses the ThermodoSDK can be found in the **_therm
 
 ###Permissions
 The first thing that needs to be configured in a project that uses the ThermodoSDK is the set up of the required permissions. Make sure you declare the following permissions in your Android manifest file:
-```
+```xml
 <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 ```
@@ -134,7 +137,9 @@ That's it! If you have followed the steps above, at this point you should have t
 
 ### Can I try/use ThermodoSDK without a Thermodo Device?
 
-No. In order to get device readings and any kind of reponse from SDK you must have Thermodo device to test with. You can order one from [our website](http://thermodo.com).
+In general, you will need a real Thermodo device build anything meaningful with this SDK. However, in case you need to run your app in an emulator (e.g. for automated UI tests on a build server), we've provided a `MockThermodo` class you can use in that case.
+
+Real Thermodo devices can be ordered from [our website](http://thermodo.com).
 
 ### The readings from the device are too hot
 
