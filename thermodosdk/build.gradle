@@ -40,13 +40,14 @@ android {
     }
 }
 
+def outputFile = "${project.name}-${android.defaultConfig.versionName}-r${android.defaultConfig.versionCode}"
+
 // Copies final .aar into build/dist folder
 task copyAar(type: Copy, dependsOn: 'assembleRelease') {
-    from file('build/libs/')
+    from file("build/libs/${project.name}.aar")
     into file('build/dist/')
 
-    include '*.aar'
-    rename '(.+).aar', "\$1-${android.defaultConfig.versionName}-r${android.defaultConfig.versionCode}.aar"
+    rename "${project.name}.aar", "${outputFile}.aar"
 }
 
 // Archives Proguard output files into build/dist/proguard.zip
@@ -58,10 +59,9 @@ task zipProguardMappings(type: Zip, dependsOn: 'assembleRelease') {
 
 // Extracts classes.jar from the final aar file. We need the jar to support Eclipse-based projects.
 task extractClassesJar(type: Copy, dependsOn: 'assembleRelease') {
-    // TODO: Get rid of the hard-coded 'thermodosdk'
-    from zipTree('build/libs/thermodosdk.aar').matching { include 'classes.jar' }
+    from zipTree("build/libs/${project.name}.aar").matching { include 'classes.jar' }
     into file('build/dist/')
-    rename 'classes.jar', "thermodosdk-${android.defaultConfig.versionName}-r${android.defaultConfig.versionCode}.jar"
+    rename 'classes.jar', "${outputFile}.jar"
 }
 
 // Defines the top-level task to invoke on the build server
