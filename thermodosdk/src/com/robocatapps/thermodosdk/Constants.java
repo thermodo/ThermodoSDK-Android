@@ -25,24 +25,27 @@ public class Constants {
      * The default audio source for the AudioRecord should be different depending on model. For
      * example,on Galaxy S3, better readings are done when using the CAMCORDER AudioSource.
      */
-    public static final int DEFAULT_AUDIO_RECORD_SOURCE;
+    public static final int DEFAULT_AUDIO_RECORD_SOURCE = getDefaultAudioRecordSource();
 
-    static {
-        //Prepare the DEFAULT_AUDIO_RECORD_SOURCE depending on model.
-        String[] camcorderAudioRecordSourceModels = new String[]{"GT-I9305"};
-        String model = Build.MODEL;
-        int defaultAudioRecordSource = Integer.MAX_VALUE;
+    private static int getDefaultAudioRecordSource() {
 
-        for (String m : camcorderAudioRecordSourceModels)
-            if (m.equalsIgnoreCase(model)) {
-                defaultAudioRecordSource = MediaRecorder.AudioSource.CAMCORDER;
-                break;
-            }
-        if (defaultAudioRecordSource == Integer.MAX_VALUE) {
-            defaultAudioRecordSource = MediaRecorder.AudioSource.MIC;
-        }
+        // Prefixes of Build.MODEL for which to use AudioSource.CAMCORDER
+        // Source: http://en.wikipedia.org/wiki/Samsung_Galaxy_S_III
+        final String[] camcorderAudioSourceModels = {
+                "GT-I9300", "GT-I9305", // Samsung Galaxy S3 International
+                "SGH-T999", // Samsung Galaxy S3 T-Mobile
+                "SGH-I747", // Samsung Galaxy S3 AT&T
+                "SCH-R530", // Samsung Galaxy S3 Cricket Wireless, U.S. Cellular, MetroPCS
+                "SCH-I535", // Samsung Galaxy S3 Verizon
+                "SPH-L710", "SCH-960L", // Samsung Galaxy S3 Sprint, Boost Mobile, Virgin Mobile
+                "SCH-S968C", // Samsung Galaxy S3 Straight Talk
+        };
 
-        DEFAULT_AUDIO_RECORD_SOURCE = defaultAudioRecordSource;
+        String model = Build.MODEL.toUpperCase();
+        for (String m : camcorderAudioSourceModels)
+            if (model.startsWith(m))
+                return MediaRecorder.AudioSource.CAMCORDER;
+
+        return MediaRecorder.AudioSource.MIC;
     }
-
 }
