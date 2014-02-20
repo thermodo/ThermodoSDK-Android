@@ -40,7 +40,7 @@ android {
     }
 }
 
-def outputFile = "${project.name}-${android.defaultConfig.versionName}-r${android.defaultConfig.versionCode}"
+def outputFile = "${project.name}-${android.defaultConfig.versionName}.${android.defaultConfig.versionCode}"
 
 // Copies final .aar into build/dist folder
 task copyAar(type: Copy, dependsOn: 'assembleRelease') {
