@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 public class SimplifiedSignalAnalyzer extends AbstractAnalyzer {
 
-	private static Logger sLog = Logger.getLogger(SimplifiedSignalAnalyzer.class.getName());
+    private static Logger sLog = Logger.getLogger(SimplifiedSignalAnalyzer.class.getName());
     // List of Samples and Frames located in audio used in resultFromAnalyzingData.
     // Allocated here to avoid constant re-allocation
     List<Sample> mSamples = new ArrayList<Sample>();
@@ -45,18 +45,18 @@ public class SimplifiedSignalAnalyzer extends AbstractAnalyzer {
         int numberOfSamplesForAnalysis = (int) Math.round(newSamples.length * 0.5 * 0.75);
         short[] leftSamples = new short[numberOfSamplesForAnalysis];
         System.arraycopy(newSamples, (int) (numberOfSamplesForAnalysis * 0.05f), leftSamples, 0,
-            numberOfSamplesForAnalysis);
+                numberOfSamplesForAnalysis);
         short[] rightSamples = new short[numberOfSamplesForAnalysis];
         System.arraycopy(newSamples, newSamples.length - (int) (numberOfSamplesForAnalysis * 1.05f),
-            rightSamples, 0, numberOfSamplesForAnalysis);
+                rightSamples, 0, numberOfSamplesForAnalysis);
 
         samplesFromBuffer(leftSamples, mSamples);
         List<Short> xValues = new ArrayList<Short>(0);
         for (Sample sample : mSamples) {
-            if (sample.sampleType == Sample.SampleType.MAX) {
-                xValues.add(sample.amplitude);
-            } else if (sample.sampleType == Sample.SampleType.MIN) {
-                xValues.add((short) -sample.amplitude);
+            if (sample.getSampleType() == Sample.SampleType.MAX) {
+                xValues.add(sample.getAmplitude());
+            } else if (sample.getSampleType() == Sample.SampleType.MIN) {
+                xValues.add((short) -sample.getAmplitude());
             }
         }
 
@@ -65,22 +65,25 @@ public class SimplifiedSignalAnalyzer extends AbstractAnalyzer {
         samplesFromBuffer(rightSamples, mSamples);
         xValues = new ArrayList<Short>(0);
         for (Sample sample : mSamples) {
-            if (sample.sampleType == Sample.SampleType.MAX) {
-                xValues.add(sample.amplitude);
-            } else if (sample.sampleType == Sample.SampleType.MIN) {
-                xValues.add((short) -sample.amplitude);
+            if (sample.getSampleType() == Sample.SampleType.MAX) {
+                xValues.add(sample.getAmplitude());
+            } else if (sample.getSampleType() == Sample.SampleType.MIN) {
+                xValues.add((short) -sample.getAmplitude());
             }
         }
 
         short rightAmplitude = medianValueOfShortList(xValues);
 
-	    sLog.fine(String.format("Left ampl: %d , Right ampl: %d", leftAmplitude, rightAmplitude));
+        sLog.fine(String.format("Left ampl: %d , Right ampl: %d", leftAmplitude, rightAmplitude));
         float resistance = ((float) rightAmplitude) / leftAmplitude * 100.0f;
         float temperature = temperatureFromResistance(resistance);
-	    sLog.fine("Temperature: " + temperature);
+        sLog.fine("Temperature: " + temperature);
 
         result.temperature = temperature;
         result.numberOfFrames = 4;
+
+        // Recycle objects
+        mSamplePool.recycleSamples(mSamples);
 
         return result;
     }

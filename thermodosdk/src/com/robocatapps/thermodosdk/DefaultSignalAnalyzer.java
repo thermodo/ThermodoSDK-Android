@@ -4,6 +4,7 @@ import com.robocatapps.thermodosdk.model.AnalyzerResult;
 import com.robocatapps.thermodosdk.model.Cell;
 import com.robocatapps.thermodosdk.model.Frame;
 import com.robocatapps.thermodosdk.model.Sample;
+import com.robocatapps.thermodosdk.model.SamplePool;
 import com.robocatapps.thermodosdk.model.Trendline;
 
 import java.util.ArrayList;
@@ -77,9 +78,9 @@ public class DefaultSignalAnalyzer extends AbstractAnalyzer {
         result.resistance = resistance;
 
         // Don't hold on to memory
-        mSamples.clear();
+        mSamplePool.recycleSamples(mSamples);
+        mSamplePool.recycleSamples(mMinMaxSamples);
         mFrames.clear();
-        mMinMaxSamples.clear();
         mAmplitudesInCell.clear();
         mIntersectionValues.clear();
 
@@ -125,12 +126,12 @@ public class DefaultSignalAnalyzer extends AbstractAnalyzer {
         for (int i = 0; i < samples.size(); i++) {
             Sample sample = samples.get(i);
 
-            if (sample.sampleType != Sample.SampleType.ZERO) {
+            if (sample.getSampleType() != Sample.SampleType.ZERO) {
                 continue;
             }
 
             // If the signal has double frequency
-            if (roundToNearestMultiple(sample.deltaBufferIndex, syncSamplesPerHalfPeriod) ==
+            if (roundToNearestMultiple(sample.getDeltaBufferIndex(), syncSamplesPerHalfPeriod) ==
                 syncSamplesPerHalfPeriod) {
                 if (frameStartIndex > 0 && frameEndIndex == 0) {
                     // Frame start has been already detected, so this sync may point to the end
@@ -170,15 +171,17 @@ public class DefaultSignalAnalyzer extends AbstractAnalyzer {
                                                    int endIndex) {
         // Create a sublist with samples of the current frame, remove all zero samples and set
         // buffer indexes relative to the startIndex.
-        int fromIndex = samples.get(startIndex).bufferIndex;
+        int fromIndex = samples.get(startIndex).getBufferIndex();
         mMinMaxSamples.clear();
         for (int i = startIndex; i <= endIndex; i++) {
             Sample sample = samples.get(i);
-            if (sample.sampleType == Sample.SampleType.ZERO)
+            if (sample.getSampleType() == Sample.SampleType.ZERO)
                 continue;
 
-            mMinMaxSamples.add(new Sample(sample.amplitude, sample.bufferIndex - fromIndex,
-                    sample.deltaBufferIndex, sample.sampleType));
+            mMinMaxSamples.add(mSamplePool.createSample(sample.getAmplitude(),
+                    sample.getBufferIndex() - fromIndex,
+                    sample.getDeltaBufferIndex(),
+                    sample.getSampleType()));
         }
 
         List<Cell> cells = new ArrayList<Cell>();
@@ -193,12 +196,12 @@ public class DefaultSignalAnalyzer extends AbstractAnalyzer {
             for (; pointIndex < mMinMaxSamples.size(); pointIndex++) {
                 Sample sample = mMinMaxSamples.get(pointIndex);
 
-                if (sample.bufferIndex > (cellIndex + 1) * SAMPLES_PER_CELL) {
+                if (sample.getBufferIndex() > (cellIndex + 1) * SAMPLES_PER_CELL) {
                     pointIndex--;
                     break;
                 }
 
-                mAmplitudesInCell.add(Math.abs((float) sample.amplitude));
+                mAmplitudesInCell.add(Math.abs((float) sample.getAmplitude()));
             }
 
             if(mAmplitudesInCell.size() > 3) {

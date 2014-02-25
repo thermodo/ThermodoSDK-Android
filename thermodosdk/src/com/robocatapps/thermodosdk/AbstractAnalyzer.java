@@ -2,6 +2,7 @@ package com.robocatapps.thermodosdk;
 
 import com.robocatapps.thermodosdk.model.AnalyzerResult;
 import com.robocatapps.thermodosdk.model.Sample;
+import com.robocatapps.thermodosdk.model.SamplePool;
 
 import java.util.List;
 
@@ -182,6 +183,8 @@ public abstract class AbstractAnalyzer {
         2.522f
     };
 
+    protected SamplePool mSamplePool = new SamplePool();
+
     /**
      * Extracts zero, high and low sample from the buffer.
      *
@@ -189,7 +192,7 @@ public abstract class AbstractAnalyzer {
      * @param outSamples {@link java.util.List} of samples to which samples containing only zero
      *                   and extreme points will be added.
      */
-    protected static void samplesFromBuffer(short[] data, List<Sample> outSamples) {
+    protected void samplesFromBuffer(short[] data, List<Sample> outSamples) {
         Sample previousZeroSample = null;
 
         int previousZeroIndex = 0;
@@ -204,12 +207,12 @@ public abstract class AbstractAnalyzer {
             if (previousSampleIsPositive != currentSampleIsPositive) {
                 int deltaOffset = sampleIndex - previousZeroIndex;
 
-                Sample zeroSample = new Sample(currentSampleAmplitude, sampleIndex, deltaOffset,
-                    Sample.SampleType.ZERO);
+                Sample zeroSample = mSamplePool.createSample(currentSampleAmplitude, sampleIndex,
+                        deltaOffset, Sample.SampleType.ZERO);
 
                 if (previousZeroSample != null) {
                     Sample extremeSample = findExtremeSampleInBuffer(data,
-                        previousZeroSample.bufferIndex, zeroSample.bufferIndex);
+                        previousZeroSample.getBufferIndex(), zeroSample.getBufferIndex());
 
                     if (extremeSample != null) {
                         outSamples.add(previousZeroSample);
@@ -232,7 +235,7 @@ public abstract class AbstractAnalyzer {
      * @return The {@link com.robocatapps.thermodosdk.model.Sample} which represent MAXIMUM or
      * MINIMUM extreme point on specified range. {@code NULL} if extreme point wasn't found.
      */
-    protected static Sample findExtremeSampleInBuffer(short[] data, int fromIndex, int toIndex) {
+    protected Sample findExtremeSampleInBuffer(short[] data, int fromIndex, int toIndex) {
 
         if (toIndex - fromIndex < 3)
             return null;
@@ -260,7 +263,7 @@ public abstract class AbstractAnalyzer {
         Sample.SampleType type = selectedAmplitude > 0 ? Sample.SampleType.MAX : Sample
             .SampleType.MIN;
 
-        return new Sample(selectedAmplitude, highestAmplitudeIndex, 0, type);
+        return mSamplePool.createSample(selectedAmplitude, highestAmplitudeIndex, 0, type);
     }
 
 
