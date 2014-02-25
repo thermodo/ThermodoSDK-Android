@@ -18,7 +18,19 @@ import static com.robocatapps.thermodosdk.Constants.SAMPLES_PER_CELL;
 import static com.robocatapps.thermodosdk.Constants.SAMPLES_PER_FRAME;
 import static com.robocatapps.thermodosdk.Constants.UPPER_AMPLITUDE;
 
+/**
+ * Analyzes an audio signal, calculating an {@link com.robocatapps.thermodosdk.model.AnalyzerResult}
+ * NOTE: This class is not re-entrant, due to re-use of arrays during calculation.
+ */
 public class DefaultSignalAnalyzer extends AbstractAnalyzer {
+
+    // Arrays used in resultFromAnalyzingData and framesWithCellsInSamples.
+    // Allocated here to avoid constant re-allocation
+    List<Sample> mSamples = new ArrayList<Sample>();
+    List<Frame> mFrames = new ArrayList<Frame>();
+    List<Sample> mMinMaxSamples = new ArrayList<Sample>();
+    List<Float> mAmplitudesInCell = new ArrayList<Float>();
+    List<Float> mIntersectionValues = new ArrayList<Float>();
 
     @Override
     public AnalyzerResult resultFromAnalyzingData(short[] data) {
@@ -32,31 +44,30 @@ public class DefaultSignalAnalyzer extends AbstractAnalyzer {
             return result;
         }
 
-        List<Sample> samples = samplesFromBuffer(data);
-        List<Frame> frames = framesFromSamples(samples);
+        samplesFromBuffer(data, mSamples);
+        framesFromSamples(mSamples, mFrames);
 
-        result.numberOfFrames = frames.size();
+        result.numberOfFrames = mFrames.size();
 
-        int nFrames = frames.size();
+        int nFrames = mFrames.size();
 
         if (nFrames == 0) {
             result.error = new Exception("No Frames were found");
             return result;
         }
 
-        List<Float> intersectionValues = new ArrayList<Float>();
-
+        mIntersectionValues.clear();
         for (int i = 0; i < nFrames; i++) {
-            List<Cell> cells = frames.get(i).cells;
+            List<Cell> cells = mFrames.get(i).cells;
 
             Trendline trendline = getTrendlineFromCells(cells);
 
             float intersection = xAxisIntersectionOfTrendline(trendline);
-            intersectionValues.add(intersection);
+            mIntersectionValues.add(intersection);
         }
 
         //Get all needed values
-        float medianIntersection = medianValueOfList(intersectionValues);
+        float medianIntersection = medianValueOfList(mIntersectionValues);
         float cancellationAmplitude = cancellationAmplitudeFromAbscissaIntersection
             (medianIntersection);
         float resistance = resistanceFromCancellationAmplitude(cancellationAmplitude);
@@ -64,6 +75,13 @@ public class DefaultSignalAnalyzer extends AbstractAnalyzer {
 
         result.temperature = temperature;
         result.resistance = resistance;
+
+        // Don't hold on to memory
+        mSamples.clear();
+        mFrames.clear();
+        mMinMaxSamples.clear();
+        mAmplitudesInCell.clear();
+        mIntersectionValues.clear();
 
         return result;
     }
@@ -96,8 +114,8 @@ public class DefaultSignalAnalyzer extends AbstractAnalyzer {
      *
      * @param samples A list of samples containing only zero and extremal values.
      */
-    private static List<Frame> framesFromSamples(List<Sample> samples) {
-        List<Frame> frames = new ArrayList<Frame>();
+    private void framesFromSamples(List<Sample> samples, List<Frame> outFrames) {
+        outFrames.clear();
         int syncSamplesPerHalfPeriod = SAMPLES_PER_CELL / PERIODS_PER_CELL / 4;
 
         int syncSamplesCount = 0;
@@ -129,7 +147,7 @@ public class DefaultSignalAnalyzer extends AbstractAnalyzer {
                     if (frameEndIndex > 0) {
                         Frame frame = frameWithCellsFromSamples(samples, frameStartIndex,
                             frameEndIndex);
-                        frames.add(frame);
+                        outFrames.add(frame);
                     }
                     frameStartIndex = i;
                 }
@@ -137,8 +155,6 @@ public class DefaultSignalAnalyzer extends AbstractAnalyzer {
                 frameEndIndex = 0;
             }
         }
-
-        return frames;
     }
 
     /**
@@ -150,49 +166,48 @@ public class DefaultSignalAnalyzer extends AbstractAnalyzer {
      * @return {@link com.robocatapps.thermodosdk.model.Frame} object with the list of detected
      * cells.
      */
-    private static Frame frameWithCellsFromSamples(List<Sample> samples, int startIndex,
+    private Frame frameWithCellsFromSamples(List<Sample> samples, int startIndex,
                                                    int endIndex) {
         // Create a sublist with samples of the current frame, remove all zero samples and set
         // buffer indexes relative to the startIndex.
         int fromIndex = samples.get(startIndex).bufferIndex;
-        int indexCount = samples.get(endIndex).bufferIndex - fromIndex;
-        List<Sample> minMaxSamples = new ArrayList<Sample>();
+        mMinMaxSamples.clear();
         for (int i = startIndex; i <= endIndex; i++) {
             Sample sample = samples.get(i);
             if (sample.sampleType == Sample.SampleType.ZERO)
                 continue;
 
-            minMaxSamples.add(new Sample(sample.amplitude, sample.bufferIndex - fromIndex,
-                sample.deltaBufferIndex, sample.sampleType));
+            mMinMaxSamples.add(new Sample(sample.amplitude, sample.bufferIndex - fromIndex,
+                    sample.deltaBufferIndex, sample.sampleType));
         }
 
         List<Cell> cells = new ArrayList<Cell>();
 
         int pointIndex = 0;
-        List<Float> amplitudesInCell = new ArrayList<Float>();
+        mAmplitudesInCell.clear();
 
         // We don't analyze sync cells, so using NUMBER_OF_CELLS - 1
         for (int cellIndex = 0; cellIndex < Constants.NUMBER_OF_CELLS - 1; cellIndex++) {
-            amplitudesInCell.clear();
+            mAmplitudesInCell.clear();
 
-            for (; pointIndex < minMaxSamples.size(); pointIndex++) {
-                Sample sample = minMaxSamples.get(pointIndex);
+            for (; pointIndex < mMinMaxSamples.size(); pointIndex++) {
+                Sample sample = mMinMaxSamples.get(pointIndex);
 
                 if (sample.bufferIndex > (cellIndex + 1) * SAMPLES_PER_CELL) {
                     pointIndex--;
                     break;
                 }
 
-                amplitudesInCell.add(Math.abs((float) sample.amplitude));
+                mAmplitudesInCell.add(Math.abs((float) sample.amplitude));
             }
 
-            if(amplitudesInCell.size() > 3) {
-                amplitudesInCell.remove(0);
-                amplitudesInCell.remove(amplitudesInCell.size()-1);
+            if(mAmplitudesInCell.size() > 3) {
+                mAmplitudesInCell.remove(0);
+                mAmplitudesInCell.remove(mAmplitudesInCell.size()-1);
             }
 
-            short amplitude = amplitudesInCell.size() == 0 ? 0 : (short) medianValueOfList
-                (amplitudesInCell);
+            short amplitude = mAmplitudesInCell.size() == 0 ? 0 : (short) medianValueOfList
+                (mAmplitudesInCell);
             cells.add(new Cell(amplitude, cellIndex));
         }
 
@@ -277,18 +292,16 @@ public class DefaultSignalAnalyzer extends AbstractAnalyzer {
 
     /**
      * Returns median value from the specified list.
+     * NOTE: A side-effect of calling this method is that the list provided will be sorted.
      */
     private static float medianValueOfList(List<Float> values) {
-        if (values.size() == 0) return 0;
-        if (values.size() <= 2) return values.get(0);
+        if (values.size() == 0)
+            return 0;
+        if (values.size() <= 2)
+            return values.get(0);
 
-        //Create a list which will contain a copy of specified array
-        List<Float> copyList = new ArrayList<Float>(values);
-
-        Collections.sort(copyList);
-
-        //Get median value
-        return copyList.get(copyList.size() / 2);
+        Collections.sort(values);
+        return values.get(values.size() / 2);
     }
 
     private static int roundToNearestMultiple(int value, int base) {

@@ -1,7 +1,5 @@
 package com.robocatapps.thermodosdk.model;
 
-import java.util.List;
-
 public class AnalyzerResult {
 
     public float temperature;
@@ -14,8 +12,5 @@ public class AnalyzerResult {
     public float maxSample;
     public int numberOfFrames;
     public String baseCellType;
-
-    public List<Sample> samples;
-    public List<Cell> cells;
     public Throwable error;
 }

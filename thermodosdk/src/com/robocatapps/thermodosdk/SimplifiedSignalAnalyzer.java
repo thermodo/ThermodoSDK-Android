@@ -11,6 +11,9 @@ import java.util.logging.Logger;
 public class SimplifiedSignalAnalyzer extends AbstractAnalyzer {
 
 	private static Logger sLog = Logger.getLogger(SimplifiedSignalAnalyzer.class.getName());
+    // List of Samples and Frames located in audio used in resultFromAnalyzingData.
+    // Allocated here to avoid constant re-allocation
+    List<Sample> mSamples = new ArrayList<Sample>();
 
     @Override
     public AnalyzerResult resultFromAnalyzingData(short[] data) {
@@ -47,9 +50,9 @@ public class SimplifiedSignalAnalyzer extends AbstractAnalyzer {
         System.arraycopy(newSamples, newSamples.length - (int) (numberOfSamplesForAnalysis * 1.05f),
             rightSamples, 0, numberOfSamplesForAnalysis);
 
-        List<Sample> xSamples = samplesFromBuffer(leftSamples);
+        samplesFromBuffer(leftSamples, mSamples);
         List<Short> xValues = new ArrayList<Short>(0);
-        for (Sample sample : xSamples) {
+        for (Sample sample : mSamples) {
             if (sample.sampleType == Sample.SampleType.MAX) {
                 xValues.add(sample.amplitude);
             } else if (sample.sampleType == Sample.SampleType.MIN) {
@@ -59,9 +62,9 @@ public class SimplifiedSignalAnalyzer extends AbstractAnalyzer {
 
         short leftAmplitude = medianValueOfShortList(xValues);
 
-        xSamples = samplesFromBuffer(rightSamples);
+        samplesFromBuffer(rightSamples, mSamples);
         xValues = new ArrayList<Short>(0);
-        for (Sample sample : xSamples) {
+        for (Sample sample : mSamples) {
             if (sample.sampleType == Sample.SampleType.MAX) {
                 xValues.add(sample.amplitude);
             } else if (sample.sampleType == Sample.SampleType.MIN) {

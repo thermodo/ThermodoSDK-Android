@@ -3,7 +3,6 @@ package com.robocatapps.thermodosdk;
 import com.robocatapps.thermodosdk.model.AnalyzerResult;
 import com.robocatapps.thermodosdk.model.Sample;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.robocatapps.thermodosdk.Constants.TEMPERATURE_INTERVAL;
@@ -186,12 +185,11 @@ public abstract class AbstractAnalyzer {
     /**
      * Extracts zero, high and low sample from the buffer.
      *
-     * @param data Buffer to analyze.
-     * @return {@link java.util.List} of samples, which contains only zero and extreme points.
+     * @param data       Buffer to analyze.
+     * @param outSamples {@link java.util.List} of samples to which samples containing only zero
+     *                   and extreme points will be added.
      */
-    protected static List<Sample> samplesFromBuffer(short[] data) {
-        List<Sample> samples = new ArrayList<Sample>();
-
+    protected static void samplesFromBuffer(short[] data, List<Sample> outSamples) {
         Sample previousZeroSample = null;
 
         int previousZeroIndex = 0;
@@ -214,8 +212,8 @@ public abstract class AbstractAnalyzer {
                         previousZeroSample.bufferIndex, zeroSample.bufferIndex);
 
                     if (extremeSample != null) {
-                        samples.add(previousZeroSample);
-                        samples.add(extremeSample);
+                        outSamples.add(previousZeroSample);
+                        outSamples.add(extremeSample);
                     }
                 }
 
@@ -223,8 +221,6 @@ public abstract class AbstractAnalyzer {
                 previousZeroIndex = sampleIndex;
             }
         }
-
-        return samples;
     }
 
     /**
