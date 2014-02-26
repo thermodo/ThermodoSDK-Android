@@ -78,7 +78,10 @@ public class ThermodoMockImpl implements Thermodo {
 		return mRunning;
 	}
 
-	@Override
+    @Override
+    public boolean isMeasuring() { return mMeasuring; }
+
+    @Override
 	public void setThermodoListener(ThermodoListener listener) {
 		this.mThermodoListener = listener;
 	}
