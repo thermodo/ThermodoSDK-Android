@@ -2,6 +2,7 @@ package com.robocatapps.thermodosdk.sample;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,6 +65,11 @@ public class MainActivity extends Activity implements ThermodoListener {
 			default:
 				sLog.severe("An unidentified error has occurred: " + what);
 		}
+	}
+
+	@Override
+	public void onPermissionsMissing() {
+		Log.d("DC", "permissions are missing");
 	}
 
 	@Override

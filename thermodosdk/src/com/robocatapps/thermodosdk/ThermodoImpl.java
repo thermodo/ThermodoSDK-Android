@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -105,8 +106,22 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
         mDeviceCheckEnabled = false; //disable device check by default
     }
 
+
+    private Boolean checkAudioPermission() {
+        String permission = "android.permission.RECORD_AUDIO";
+        int res = mAppContext.checkCallingOrSelfPermission(permission);
+        String secondPermission = "android.permission.MODIFY_AUDIO_SETTINGS";
+        int resModify = mAppContext.checkCallingOrSelfPermission(secondPermission);
+        return (res == PackageManager.PERMISSION_GRANTED && resModify == PackageManager.PERMISSION_GRANTED);
+    }
+
     @Override
     public void start() {
+        if (!checkAudioPermission()) {
+            mListener.onPermissionsMissing();
+            return;
+        }
+
         if (mIsRunning)
             return;
 
@@ -160,7 +175,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
     }
 
     /**
-     * This method is called from the {@link android.content.BroadcastReceiver} when headset is
+     * This method is called from the {@linlink android.content.BroadcastReceiver} when headset is
      * plugged in or plugged out.
      *
      * @param pluggedIn Represents is headset was plugged in.

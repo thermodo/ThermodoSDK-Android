@@ -30,4 +30,9 @@ public interface ThermodoListener {
      * the Thermodo. <p>Common error codes are found in the Thermodo interface.</p>
      */
     public void onErrorOccurred(int what);
+
+    /**
+     * Called when system permissions are not set, we request an Activity to present the permission dialog upon.
+     */
+    public void onPermissionsMissing();
 }
