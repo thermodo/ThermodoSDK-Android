@@ -3,5 +3,6 @@
 
     <string name="app_name">Thermodo SDK Sample</string>
     <string name="thermodo_unplugged">The Thermodo sensor is unplugged. Plug it in to start measuring.</string>
+    <string name="thermodo_plugged">The Thermodo sensor is plugged in. Accept permissions to continue.</string>
 
 </resources>

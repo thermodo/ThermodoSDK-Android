@@ -35,4 +35,12 @@ public interface ThermodoListener {
      * Called when system permissions are not set, we request an Activity to present the permission dialog upon.
      */
     public void onPermissionsMissing();
+
+    /**
+     * Called when a thermodo is plugged in or plugged out.
+     *
+     *
+     * @param isPlugged is a Thermodo present or not?
+     */
+    public void onThermodoPlugged(Boolean isPlugged);
 }

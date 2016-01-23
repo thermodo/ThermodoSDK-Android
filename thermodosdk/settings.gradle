@@ -1,1 +1,1 @@
-include ':app', ':thermodosdk2'
+include ':app', ':thermodosdk'

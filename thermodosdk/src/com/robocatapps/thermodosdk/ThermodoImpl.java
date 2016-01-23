@@ -117,11 +117,6 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 
     @Override
     public void start() {
-        if (!checkAudioPermission()) {
-            mListener.onPermissionsMissing();
-            return;
-        }
-
         if (mIsRunning)
             return;
 
@@ -181,18 +176,20 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
      * @param pluggedIn Represents is headset was plugged in.
      */
     private void headSetPluggedIn(boolean pluggedIn) {
+        mListener.onThermodoPlugged(pluggedIn);
         //Set volume settings
         if (pluggedIn)
             setVolumeSettings();
 
         //If plugged and is running, check the device or directly start measuring
-        if (pluggedIn && mIsRunning && !mIsMeasuring)
+        if (pluggedIn && mIsRunning && !mIsMeasuring && checkAudioPermission()) {
             if (mDeviceCheckEnabled)
                 checkDevice();
             else
                 onDetectionResult(true);
-        else if (mIsMeasuring)
+        } else if (mIsMeasuring) {
             stopMeasuring();
+        }
 
         if (mThermodoIsPlugged && !pluggedIn) {
             mThermodoIsPlugged = false;

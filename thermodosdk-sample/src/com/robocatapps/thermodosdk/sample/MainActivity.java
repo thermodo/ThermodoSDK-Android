@@ -67,12 +67,22 @@ public class MainActivity extends Activity implements ThermodoListener {
 		}
 	}
 
+
 	@Override
 	public void onPermissionsMissing() {
 		Log.d("DC", "permissions are missing");
 	}
 
-	@Override
+    @Override
+    public void onThermodoPlugged(Boolean isPlugged) {
+        if (isPlugged) {
+            mTemperatureTextView.setText(getString(R.string.thermodo_plugged));
+        } else {
+            mTemperatureTextView.setText(getString(R.string.thermodo_unplugged));
+        }
+    }
+
+    @Override
 	protected void onStart() {
 		super.onStart();
 		mThermodo.start();
