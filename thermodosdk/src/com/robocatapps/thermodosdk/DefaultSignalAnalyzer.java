@@ -4,7 +4,6 @@ import com.robocatapps.thermodosdk.model.AnalyzerResult;
 import com.robocatapps.thermodosdk.model.Cell;
 import com.robocatapps.thermodosdk.model.Frame;
 import com.robocatapps.thermodosdk.model.Sample;
-import com.robocatapps.thermodosdk.model.SamplePool;
 import com.robocatapps.thermodosdk.model.Trendline;
 
 import java.util.ArrayList;
@@ -72,9 +71,8 @@ public class DefaultSignalAnalyzer extends AbstractAnalyzer {
         float cancellationAmplitude = cancellationAmplitudeFromAbscissaIntersection
             (medianIntersection);
         float resistance = resistanceFromCancellationAmplitude(cancellationAmplitude);
-        float temperature = temperatureFromResistance(resistance);
 
-        result.temperature = temperature;
+        result.temperature = temperatureFromResistance(resistance);
         result.resistance = resistance;
 
         // Don't hold on to memory

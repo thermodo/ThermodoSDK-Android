@@ -45,8 +45,8 @@ public class SoundGenerator {
      * Generates a signal which switches from left to right channel in the middle
      *
      * @param channelDuration Duration of every channel
-     * @param frequency
-     * @return
+     * @param frequency the frequency on which has to be listened
+     * @return a Sound object
      */
     public static Sound generateL2RSignal(int channelDuration, int frequency) {
         int samplesPerChannel = getSamplesCount(frequency, channelDuration);

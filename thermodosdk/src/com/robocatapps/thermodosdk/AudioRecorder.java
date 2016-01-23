@@ -25,7 +25,7 @@ public class AudioRecorder {
          * @param data The audio data recorded. This is only guaranteed to be valid during the
          *             execution of the call-back as the buffer is re-used.
          */
-        public void onBufferFilled(short[] data);
+        void onBufferFilled(short[] data);
 
 	    /**
 	     * Called if an error occurs while recording. Recording thread will reach an unstable state,
@@ -36,7 +36,7 @@ public class AudioRecorder {
 	     * @param what The value returned from {@link android.media.AudioRecord#read(short[], int,
 	     * int)}
 	     */
-	    public void onRecorderError(int what);
+	    void onRecorderError(int what);
     }
 
     private final OnBufferFilledListener mBufferListener;

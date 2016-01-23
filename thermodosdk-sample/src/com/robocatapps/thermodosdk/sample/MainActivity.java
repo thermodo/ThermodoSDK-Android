@@ -45,7 +45,7 @@ public class MainActivity extends Activity implements ThermodoListener {
 	@Override
 	public void onTemperatureMeasured(float temperature) {
 		mTemperatureTextView.setText(Float.toString(temperature));
-		sLog.fine("Got temparature: " + temperature);
+		sLog.fine("Got temperature: " + temperature);
 	}
 
 	@Override

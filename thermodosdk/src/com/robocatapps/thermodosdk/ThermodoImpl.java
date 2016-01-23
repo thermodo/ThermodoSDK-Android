@@ -170,7 +170,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
     }
 
     /**
-     * This method is called from the {@linlink android.content.BroadcastReceiver} when headset is
+     * This method is called from the {@link android.content.BroadcastReceiver} when headset is
      * plugged in or plugged out.
      *
      * @param pluggedIn Represents is headset was plugged in.
@@ -189,6 +189,8 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
                 onDetectionResult(true);
         } else if (mIsMeasuring) {
             stopMeasuring();
+        } else if (!checkAudioPermission()) {
+            mListener.onPermissionsMissing();
         }
 
         if (mThermodoIsPlugged && !pluggedIn) {
