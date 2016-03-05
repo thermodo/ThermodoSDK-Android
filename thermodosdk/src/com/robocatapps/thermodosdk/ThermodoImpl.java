@@ -133,9 +133,6 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
 
         //Set listener for the headset detector
         mAppContext.registerReceiver(mHeadsetDetector, HEADSET_PLUG_INTENT_FILTER);
-
-        //Set Thermodo is running
-        mIsRunning = true;
     }
 
 
@@ -156,7 +153,7 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
             return;
 
         //Unregister for headset plug detection
-        mAppContext.unregisterReceiver(mHeadsetDetector);
+        //mAppContext.unregisterReceiver(mHeadsetDetector);
 
         //Stop measurements
         stopMeasuring();
@@ -176,13 +173,14 @@ public final class ThermodoImpl implements AudioRecorder.OnBufferFilledListener,
      * @param pluggedIn Represents is headset was plugged in.
      */
     private void headSetPluggedIn(boolean pluggedIn) {
-        mListener.onThermodoPlugged(pluggedIn);
+         mListener.onThermodoPlugged(pluggedIn);
         //Set volume settings
         if (pluggedIn)
             setVolumeSettings();
 
         //If plugged and is running, check the device or directly start measuring
-        if (pluggedIn && mIsRunning && !mIsMeasuring && checkAudioPermission()) {
+        if (pluggedIn && !mIsMeasuring && checkAudioPermission()) {
+            mIsRunning = true;
             if (mDeviceCheckEnabled)
                 checkDevice();
             else
